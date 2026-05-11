@@ -30,7 +30,18 @@
         .header {
             background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
             padding: 16px 20px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 200px;
         }
 
         .header h1 {
@@ -43,9 +54,15 @@
             font-size: 12px;
         }
 
+        .header-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
         .content {
             display: flex;
-            flex-direction: column;
             flex: 1;
             gap: 16px;
             padding: 16px;
@@ -107,60 +124,22 @@
             font-size: 12px;
         }
 
-        .control-section {
-            width: 100%;
+        .data-container {
+            width: 280px;
             background: #1e293b;
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             display: flex;
-            gap: 16px;
-            align-items: flex-start;
-            flex-wrap: wrap;
-        }
-
-        .status {
-            background: #0f172a;
-            padding: 16px;
-            border-radius: 8px;
-            border-left: 4px solid #ef4444;
-            min-width: 150px;
-        }
-
-        .status.active {
-            border-left-color: #10b981;
-        }
-
-        .status-label {
-            font-size: 11px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .status-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #ef4444;
-        }
-
-        .status.active .status-value {
-            color: #10b981;
-        }
-
-        .data-container {
-            display: flex;
+            flex-direction: column;
             gap: 12px;
-            flex: 1;
-            min-width: 300px;
+            overflow-y: auto;
         }
 
         .data-item {
             background: #0f172a;
             padding: 12px;
             border-radius: 6px;
-            flex: 1;
         }
 
         .data-label {
@@ -178,10 +157,31 @@
             word-break: break-all;
         }
 
-        .controls {
+        .stats {
             display: flex;
+            flex-direction: column;
             gap: 8px;
-            flex-wrap: wrap;
+            padding-top: 12px;
+            border-top: 1px solid #334155;
+        }
+
+        .stat-box {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 2px;
         }
 
         .btn {
@@ -257,36 +257,16 @@
             box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
         }
 
-        .stats {
-            display: flex;
-            gap: 12px;
-        }
-
-        .stat-box {
-            background: #0f172a;
-            padding: 12px;
-            border-radius: 6px;
-            text-align: center;
-            min-width: 80px;
-        }
-
-        .stat-number {
-            font-size: 16px;
-            font-weight: bold;
-            color: #3b82f6;
-        }
-
-        .stat-label {
-            font-size: 10px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-
         .message {
             padding: 12px;
             border-radius: 6px;
             font-size: 12px;
-            width: 100%;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 2000;
+            max-width: 400px;
         }
 
         .message.error {
@@ -304,9 +284,9 @@
                 flex-direction: column;
             }
 
-            .control-section {
+            .data-container {
                 width: 100%;
-                max-height: auto;
+                max-height: 250px;
             }
 
             .map-section {
@@ -316,29 +296,31 @@
         }
 
         @media (max-width: 768px) {
-            .control-section {
+            .header {
                 flex-direction: column;
+                align-items: stretch;
             }
 
-            .data-container {
-                flex-direction: column;
+            .header-title {
                 min-width: auto;
             }
 
-            .data-item {
-                flex: none;
-            }
-
-            .controls {
+            .header-controls {
                 width: 100%;
             }
 
             .btn {
                 flex: 1;
+                min-width: 80px;
             }
 
-            .stats {
+            .data-container {
                 width: 100%;
+            }
+
+            .content {
+                gap: 8px;
+                padding: 8px;
             }
         }
 
@@ -351,18 +333,12 @@
                 font-size: 18px;
             }
 
-            .content {
-                padding: 8px;
-                gap: 8px;
+            .header p {
+                font-size: 11px;
             }
 
-            .control-section {
-                padding: 12px;
-                gap: 8px;
-            }
-
-            .data-item {
-                padding: 8px;
+            .header-controls {
+                gap: 4px;
             }
 
             .btn {
@@ -370,9 +346,14 @@
                 font-size: 11px;
             }
 
-            .status {
-                min-width: 120px;
+            .data-container {
                 padding: 12px;
+            }
+
+            .message {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
             }
         }
     </style>
@@ -380,8 +361,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📍 GPS Tracker with Real-Time Map</h1>
-            <p>Track your location and visualize it on OpenStreetMap</p>
+            <div class="header-title">
+                <h1>📍 GPS Tracker</h1>
+                <p>Real-time location tracking on OpenStreetMap</p>
+            </div>
+            <div class="header-controls">
+                <button class="btn btn-start" id="startBtn" onclick="startTracking()">▶ Start</button>
+                <button class="btn btn-stop" id="stopBtn" onclick="stopTracking()" disabled>⏹ Stop</button>
+                <button class="btn btn-export" id="exportBtn" onclick="exportData()" disabled>📥 Export</button>
+                <button class="btn btn-clear" id="clearBtn" onclick="clearData()">🗑️ Clear</button>
+            </div>
         </div>
 
         <div class="content">
@@ -395,55 +384,40 @@
                 </div>
             </div>
 
-            <div class="control-section">
-                <!-- Status -->
-                <div class="status" id="status">
-                    <div class="status-label">Status</div>
-                    <div class="status-value">Ready</div>
-                </div>
-
+            <div class="data-container">
                 <!-- Current Data -->
-                <div class="data-container">
-                    <div class="data-item">
-                        <div class="data-label">Latitude</div>
-                        <div class="data-value" id="latitude">--</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Longitude</div>
-                        <div class="data-value" id="longitude">--</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Altitude</div>
-                        <div class="data-value" id="altitude">--</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Speed</div>
-                        <div class="data-value" id="speed">--</div>
-                    </div>
+                <div class="data-item">
+                    <div class="data-label">Latitude</div>
+                    <div class="data-value" id="latitude">--</div>
                 </div>
-
-                <!-- Controls -->
-                <div class="controls">
-                    <button class="btn btn-start" id="startBtn" onclick="startTracking()">▶ Start</button>
-                    <button class="btn btn-stop" id="stopBtn" onclick="stopTracking()" disabled>⏹ Stop</button>
-                    <button class="btn btn-export" id="exportBtn" onclick="exportData()" disabled>📥 Export GeoJSON</button>
-                    <button class="btn btn-clear" id="clearBtn" onclick="clearData()">🗑️ Clear</button>
+                <div class="data-item">
+                    <div class="data-label">Longitude</div>
+                    <div class="data-value" id="longitude">--</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">Altitude</div>
+                    <div class="data-value" id="altitude">--</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">Speed</div>
+                    <div class="data-value" id="speed">--</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">Accuracy</div>
+                    <div class="data-value" id="accuracy">--</div>
                 </div>
 
                 <!-- Stats -->
                 <div class="stats">
                     <div class="stat-box">
                         <div class="stat-number" id="pointCount">0</div>
-                        <div class="stat-label">Points</div>
+                        <div class="stat-label">Points Logged</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-number" id="duration">00:00:00</div>
                         <div class="stat-label">Duration</div>
                     </div>
                 </div>
-
-                <!-- Message -->
-                <div id="message" style="flex: 0 0 100%;"></div>
             </div>
         </div>
     </div>
@@ -459,8 +433,9 @@
         let polyline = null;
         let allPointsMarkers = [];
 
-        const statusEl = document.getElementById('status');
-        const messageEl = document.getElementById('message');
+        const messageEl = document.createElement('div');
+        document.body.appendChild(messageEl);
+
         const loadingOverlay = document.getElementById('loadingOverlay');
 
         // Create arrow icon for direction
@@ -534,6 +509,7 @@
                     document.getElementById('longitude').textContent = coord.longitude.toFixed(6);
                     document.getElementById('altitude').textContent = coord.altitude ? coord.altitude.toFixed(2) + ' m' : 'N/A';
                     document.getElementById('speed').textContent = coord.speed ? (coord.speed * 3.6).toFixed(2) + ' km/h' : 'N/A';
+                    document.getElementById('accuracy').textContent = coord.accuracy ? coord.accuracy.toFixed(2) + ' m' : 'N/A';
 
                     // Hide loading overlay
                     loadingOverlay.style.display = 'none';
@@ -566,7 +542,8 @@
 
         // Show message
         function showMessage(msg, type = 'error') {
-            messageEl.innerHTML = `<div class="message ${type}">${msg}</div>`;
+            messageEl.className = `message ${type}`;
+            messageEl.textContent = msg;
             setTimeout(() => {
                 messageEl.innerHTML = '';
             }, 5000);
@@ -588,9 +565,6 @@
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
             document.getElementById('exportBtn').disabled = true;
-
-            statusEl.classList.add('active');
-            statusEl.querySelector('.status-value').textContent = 'Tracking';
 
             polyline.setLatLngs([]);
 
@@ -641,9 +615,6 @@
             document.getElementById('stopBtn').disabled = true;
             document.getElementById('exportBtn').disabled = points.length === 0;
 
-            statusEl.classList.remove('active');
-            statusEl.querySelector('.status-value').textContent = 'Stopped';
-
             clearInterval(durationInterval);
 
             showMessage(`Tracking stopped. ${points.length} points logged.`, 'success');
@@ -655,6 +626,7 @@
             document.getElementById('longitude').textContent = point.longitude.toFixed(6);
             document.getElementById('altitude').textContent = point.altitude ? point.altitude.toFixed(2) + ' m' : 'N/A';
             document.getElementById('speed').textContent = point.speed ? (point.speed * 3.6).toFixed(2) + ' km/h' : 'N/A';
+            document.getElementById('accuracy').textContent = point.accuracy ? point.accuracy.toFixed(2) + ' m' : 'N/A';
         }
 
         // Update map
@@ -784,6 +756,7 @@
                 document.getElementById('longitude').textContent = '--';
                 document.getElementById('altitude').textContent = '--';
                 document.getElementById('speed').textContent = '--';
+                document.getElementById('accuracy').textContent = '--';
                 document.getElementById('exportBtn').disabled = true;
                 showMessage('Data cleared', 'success');
             }
