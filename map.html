@@ -59,11 +59,52 @@
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             min-width: 0;
+            position: relative;
         }
 
         #map {
             width: 100%;
             height: 100%;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: 12px;
+        }
+
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .spinner {
+            border: 3px solid #334155;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #cbd5e1;
+            font-size: 12px;
         }
 
         .control-section {
@@ -346,6 +387,12 @@
         <div class="content">
             <div class="map-section">
                 <div id="map"></div>
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Getting your location...</div>
+                    </div>
+                </div>
             </div>
 
             <div class="control-section">
@@ -414,6 +461,7 @@
 
         const statusEl = document.getElementById('status');
         const messageEl = document.getElementById('message');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         // Create arrow icon for direction
         function createArrowIcon(heading) {
@@ -446,6 +494,62 @@
                 lineCap: 'round',
                 lineJoin: 'round'
             }).addTo(map);
+
+            // Get current position on load
+            getCurrentPosition();
+        }
+
+        // Get current position
+        function getCurrentPosition() {
+            if (!navigator.geolocation) {
+                loadingOverlay.style.display = 'none';
+                showMessage('Geolocation is not supported by your browser', 'error');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const coord = position.coords;
+                    const latlng = [coord.latitude, coord.longitude];
+                    
+                    // Center map on current position
+                    map.setView(latlng, 15);
+                    
+                    // Show current position marker
+                    currentMarker = L.marker(latlng, {
+                        icon: createArrowIcon(coord.heading || 0)
+                    }).addTo(map);
+
+                    currentMarker.bindPopup(`
+                        <b>Current Location</b><br>
+                        Lat: ${coord.latitude.toFixed(6)}<br>
+                        Lon: ${coord.longitude.toFixed(6)}<br>
+                        Alt: ${coord.altitude ? coord.altitude.toFixed(2) + 'm' : 'N/A'}<br>
+                        Speed: ${coord.speed ? (coord.speed * 3.6).toFixed(2) + ' km/h' : 'N/A'}<br>
+                        Heading: ${coord.heading ? coord.heading.toFixed(2) + '°' : 'N/A'}
+                    `);
+
+                    // Update display
+                    document.getElementById('latitude').textContent = coord.latitude.toFixed(6);
+                    document.getElementById('longitude').textContent = coord.longitude.toFixed(6);
+                    document.getElementById('altitude').textContent = coord.altitude ? coord.altitude.toFixed(2) + ' m' : 'N/A';
+                    document.getElementById('speed').textContent = coord.speed ? (coord.speed * 3.6).toFixed(2) + ' km/h' : 'N/A';
+
+                    // Hide loading overlay
+                    loadingOverlay.style.display = 'none';
+                    showMessage('Map centered on your current location', 'success');
+                },
+                (error) => {
+                    loadingOverlay.style.display = 'none';
+                    console.error('Geolocation error:', error);
+                    showMessage('Could not get your location. Please enable location services.', 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
         }
 
         // Request Wake Lock
