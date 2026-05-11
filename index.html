@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            padding: 24px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-content {
+            padding: 24px;
+        }
+
+        .status {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ef4444;
+        }
+
+        .status.active {
+            border-left-color: #10b981;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .status-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ef4444;
+        }
+
+        .status.active .status-value {
+            color: #10b981;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .data-item {
+            background: #0f172a;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .data-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .data-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #3b82f6;
+            word-break: break-all;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-start {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-start:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-stop {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-stop:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-export {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-export:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-clear {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #6d28d9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+        }
+
+        .log-container {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .log-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #1e293b;
+            border-left: 3px solid #3b82f6;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+
+        .log-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .empty-log {
+            color: #64748b;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .error {
+            background: #7f1d1d;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #064e3b;
+            color: #86efac;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .card-content {
+                padding: 16px;
+            }
+
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                flex: none;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>📍 GPS Tracker</h1>
+                <p>Track your location with high accuracy</p>
+            </div>
+
+            <div class="card-content">
+                <!-- Status -->
+                <div class="status" id="status">
+                    <div class="status-label">Status</div>
+                    <div class="status-value">Ready</div>
+                </div>
+
+                <!-- Current Data -->
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Latitude</div>
+                        <div class="data-value" id="latitude">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Longitude</div>
+                        <div class="data-value" id="longitude">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Altitude</div>
+                        <div class="data-value" id="altitude">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Speed</div>
+                        <div class="data-value" id="speed">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Accuracy</div>
+                        <div class="data-value" id="accuracy">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Heading</div>
+                        <div class="data-value" id="heading">--</div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="controls">
+                    <button class="btn btn-start" id="startBtn" onclick="startTracking()">▶ Start</button>
+                    <button class="btn btn-stop" id="stopBtn" onclick="stopTracking()" disabled>⏹ Stop</button>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-export" id="exportBtn" onclick="exportData()" disabled>📥 Export GeoJSON</button>
+                    <button class="btn btn-clear" id="clearBtn" onclick="clearData()">🗑️ Clear Data</button>
+                </div>
+
+                <!-- Messages -->
+                <div id="message"></div>
+
+                <!-- Stats -->
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="pointCount">0</div>
+                        <div class="stat-label">Points Logged</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="duration">00:00:00</div>
+                        <div class="stat-label">Duration</div>
+                    </div>
+                </div>
+
+                <!-- Log -->
+                <div class="log-container">
+                    <div class="log-title">Data Log</div>
+                    <div id="log" class="empty-log">No data logged yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tracking = false;
+        let watchId = null;
+        let points = [];
+        let startTime = null;
+        let durationInterval = null;
+
+        const statusEl = document.getElementById('status');
+        const logEl = document.getElementById('log');
+        const messageEl = document.getElementById('message');
+
+        // Request Wake Lock
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    await navigator.wakeLock.request('screen');
+                    showMessage('Screen will stay on during tracking', 'success');
+                } catch (err) {
+                    console.log('Wake Lock failed:', err);
+                }
+            }
+        }
+
+        // Release Wake Lock
+        async function releaseWakeLock() {
+            // Wake Lock is automatically released on page visibility change
+            // No manual release needed in this implementation
+        }
+
+        // Show message
+        function showMessage(msg, type = 'error') {
+            messageEl.innerHTML = `<div class="${type}">${msg}</div>`;
+            setTimeout(() => {
+                messageEl.innerHTML = '';
+            }, 5000);
+        }
+
+        // Start tracking
+        function startTracking() {
+            if (!navigator.geolocation) {
+                showMessage('Geolocation is not supported by your browser', 'error');
+                return;
+            }
+
+            requestWakeLock();
+
+            tracking = true;
+            points = [];
+            startTime = Date.now();
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('exportBtn').disabled = true;
+
+            statusEl.classList.add('active');
+            statusEl.querySelector('.status-value').textContent = 'Tracking';
+
+            logEl.innerHTML = '';
+
+            // Start duration timer
+            durationInterval = setInterval(updateDuration, 1000);
+
+            // Watch position with high accuracy
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const coord = position.coords;
+                    const timestamp = new Date().toISOString();
+
+                    const point = {
+                        latitude: coord.latitude,
+                        longitude: coord.longitude,
+                        altitude: coord.altitude,
+                        speed: coord.speed,
+                        accuracy: coord.accuracy,
+                        heading: coord.heading,
+                        timestamp: timestamp
+                    };
+
+                    points.push(point);
+                    updateDisplay(point);
+                    addLog(point);
+                    updateStats();
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    showMessage('Geolocation error: ' + error.message, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Stop tracking
+        function stopTracking() {
+            tracking = false;
+            navigator.geolocation.clearWatch(watchId);
+            releaseWakeLock();
+
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('exportBtn').disabled = points.length === 0;
+
+            statusEl.classList.remove('active');
+            statusEl.querySelector('.status-value').textContent = 'Stopped';
+
+            clearInterval(durationInterval);
+
+            showMessage(`Tracking stopped. ${points.length} points logged.`, 'success');
+        }
+
+        // Update display
+        function updateDisplay(point) {
+            document.getElementById('latitude').textContent = point.latitude.toFixed(6);
+            document.getElementById('longitude').textContent = point.longitude.toFixed(6);
+            document.getElementById('altitude').textContent = point.altitude ? point.altitude.toFixed(2) + ' m' : 'N/A';
+            document.getElementById('speed').textContent = point.speed ? (point.speed * 3.6).toFixed(2) + ' km/h' : 'N/A';
+            document.getElementById('accuracy').textContent = point.accuracy ? point.accuracy.toFixed(2) + ' m' : 'N/A';
+            document.getElementById('heading').textContent = point.heading ? point.heading.toFixed(2) + '°' : 'N/A';
+        }
+
+        // Add log entry
+        function addLog(point) {
+            if (logEl.textContent === 'No data logged yet') {
+                logEl.innerHTML = '';
+            }
+
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            logItem.textContent = `[${point.timestamp}] Lat: ${point.latitude.toFixed(6)}, Lon: ${point.longitude.toFixed(6)}, Alt: ${point.altitude ? point.altitude.toFixed(2) + 'm' : 'N/A'}, Speed: ${point.speed ? (point.speed * 3.6).toFixed(2) + 'km/h' : 'N/A'}`;
+            logEl.insertBefore(logItem, logEl.firstChild);
+
+            // Limit log display to last 50 items
+            while (logEl.children.length > 50) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('pointCount').textContent = points.length;
+        }
+
+        // Update duration
+        function updateDuration() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+
+            document.getElementById('duration').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Export as GeoJSON
+        function exportData() {
+            if (points.length === 0) {
+                showMessage('No data to export', 'error');
+                return;
+            }
+
+            const features = points.map((point, index) => ({
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [point.longitude, point.latitude]
+                },
+                properties: {
+                    index: index + 1,
+                    altitude: point.altitude,
+                    speed: point.speed,
+                    accuracy: point.accuracy,
+                    heading: point.heading,
+                    timestamp: point.timestamp
+                }
+            }));
+
+            const geojson = {
+                type: 'FeatureCollection',
+                properties: {
+                    name: 'GPS Track',
+                    startTime: points[0].timestamp,
+                    endTime: points[points.length - 1].timestamp,
+                    pointCount: points.length
+                },
+                features: features
+            };
+
+            const dataStr = JSON.stringify(geojson, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `gps-track-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            showMessage(`Exported ${points.length} points as GeoJSON`, 'success');
+        }
+
+        // Clear data
+        function clearData() {
+            if (confirm('Clear all logged data?')) {
+                points = [];
+                logEl.innerHTML = '<div class="empty-log">No data logged yet</div>';
+                document.getElementById('pointCount').textContent = '0';
+                document.getElementById('duration').textContent = '00:00:00';
+                document.getElementById('latitude').textContent = '--';
+                document.getElementById('longitude').textContent = '--';
+                document.getElementById('altitude').textContent = '--';
+                document.getElementById('speed').textContent = '--';
+                document.getElementById('accuracy').textContent = '--';
+                document.getElementById('heading').textContent = '--';
+                document.getElementById('exportBtn').disabled = true;
+                showMessage('Data cleared', 'success');
+            }
+        }
+
+        // Request permission on load
+        window.addEventListener('load', () => {
+            if (navigator.permissions && navigator.permissions.query) {
+                navigator.permissions.query({ name: 'geolocation' }).then(perm => {
+                    if (perm.state === 'denied') {
+                        showMessage('Location permission is denied. Please enable it in settings.', 'error');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
