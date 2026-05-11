@@ -6,6 +6,7 @@
     <title>GPS Tracker with Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         * {
             margin: 0;
@@ -44,6 +45,7 @@
 
         .content {
             display: flex;
+            flex-direction: column;
             flex: 1;
             gap: 16px;
             padding: 16px;
@@ -65,15 +67,15 @@
         }
 
         .control-section {
-            width: 320px;
+            width: 100%;
             background: #1e293b;
             border-radius: 12px;
             padding: 16px;
-            overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             display: flex;
-            flex-direction: column;
             gap: 16px;
+            align-items: flex-start;
+            flex-wrap: wrap;
         }
 
         .status {
@@ -81,6 +83,7 @@
             padding: 16px;
             border-radius: 8px;
             border-left: 4px solid #ef4444;
+            min-width: 150px;
         }
 
         .status.active {
@@ -105,10 +108,18 @@
             color: #10b981;
         }
 
+        .data-container {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            min-width: 300px;
+        }
+
         .data-item {
             background: #0f172a;
             padding: 12px;
             border-radius: 6px;
+            flex: 1;
         }
 
         .data-label {
@@ -128,18 +139,19 @@
 
         .controls {
             display: flex;
-            flex-direction: column;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 12px 16px;
+            padding: 10px 14px;
             border: none;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .btn-start {
@@ -205,9 +217,8 @@
         }
 
         .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            display: flex;
+            gap: 12px;
         }
 
         .stat-box {
@@ -215,10 +226,11 @@
             padding: 12px;
             border-radius: 6px;
             text-align: center;
+            min-width: 80px;
         }
 
         .stat-number {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #3b82f6;
         }
@@ -226,13 +238,14 @@
         .stat-label {
             font-size: 10px;
             color: #64748b;
-            margin-top: 3px;
+            margin-top: 2px;
         }
 
         .message {
             padding: 12px;
             border-radius: 6px;
             font-size: 12px;
+            width: 100%;
         }
 
         .message.error {
@@ -252,11 +265,39 @@
 
             .control-section {
                 width: 100%;
-                max-height: 300px;
+                max-height: auto;
             }
 
             .map-section {
                 flex: 1;
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .control-section {
+                flex-direction: column;
+            }
+
+            .data-container {
+                flex-direction: column;
+                min-width: auto;
+            }
+
+            .data-item {
+                flex: none;
+            }
+
+            .controls {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+            }
+
+            .stats {
+                width: 100%;
             }
         }
 
@@ -275,18 +316,22 @@
             }
 
             .control-section {
-                max-height: 250px;
                 padding: 12px;
-                gap: 12px;
+                gap: 8px;
             }
 
             .data-item {
-                padding: 10px;
+                padding: 8px;
             }
 
             .btn {
-                padding: 10px 12px;
-                font-size: 12px;
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+
+            .status {
+                min-width: 120px;
+                padding: 12px;
             }
         }
     </style>
@@ -311,36 +356,32 @@
                 </div>
 
                 <!-- Current Data -->
-                <div class="data-item">
-                    <div class="data-label">Latitude</div>
-                    <div class="data-value" id="latitude">--</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-label">Longitude</div>
-                    <div class="data-value" id="longitude">--</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-label">Altitude</div>
-                    <div class="data-value" id="altitude">--</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-label">Speed</div>
-                    <div class="data-value" id="speed">--</div>
+                <div class="data-container">
+                    <div class="data-item">
+                        <div class="data-label">Latitude</div>
+                        <div class="data-value" id="latitude">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Longitude</div>
+                        <div class="data-value" id="longitude">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Altitude</div>
+                        <div class="data-value" id="altitude">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Speed</div>
+                        <div class="data-value" id="speed">--</div>
+                    </div>
                 </div>
 
                 <!-- Controls -->
                 <div class="controls">
                     <button class="btn btn-start" id="startBtn" onclick="startTracking()">▶ Start</button>
                     <button class="btn btn-stop" id="stopBtn" onclick="stopTracking()" disabled>⏹ Stop</button>
-                </div>
-
-                <div class="controls">
                     <button class="btn btn-export" id="exportBtn" onclick="exportData()" disabled>📥 Export GeoJSON</button>
-                    <button class="btn btn-clear" id="clearBtn" onclick="clearData()">🗑️ Clear Data</button>
+                    <button class="btn btn-clear" id="clearBtn" onclick="clearData()">🗑️ Clear</button>
                 </div>
-
-                <!-- Message -->
-                <div id="message"></div>
 
                 <!-- Stats -->
                 <div class="stats">
@@ -353,6 +394,9 @@
                         <div class="stat-label">Duration</div>
                     </div>
                 </div>
+
+                <!-- Message -->
+                <div id="message" style="flex: 0 0 100%;"></div>
             </div>
         </div>
     </div>
@@ -366,9 +410,25 @@
         let durationInterval = null;
         let currentMarker = null;
         let polyline = null;
+        let allPointsMarkers = [];
 
         const statusEl = document.getElementById('status');
         const messageEl = document.getElementById('message');
+
+        // Create arrow icon for direction
+        function createArrowIcon(heading) {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#10b981" width="32" height="32">
+                <path d="M12 2L2 20h8v2h4v-2h8L12 2z"/>
+            </svg>`;
+            
+            return L.divIcon({
+                html: `<div style="transform: rotate(${heading || 0}deg); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">${svg}</div>`,
+                className: 'direction-icon',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16],
+                popupAnchor: [0, -16]
+            });
+        }
 
         // Initialize map
         function initMap() {
@@ -419,6 +479,7 @@
 
             tracking = true;
             points = [];
+            allPointsMarkers = [];
             startTime = Date.now();
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
@@ -428,6 +489,10 @@
             statusEl.querySelector('.status-value').textContent = 'Tracking';
 
             polyline.setLatLngs([]);
+
+            // Clear all point markers
+            allPointsMarkers.forEach(marker => map.removeLayer(marker));
+            allPointsMarkers = [];
 
             durationInterval = setInterval(updateDuration, 1000);
 
@@ -492,19 +557,14 @@
         function updateMap(point) {
             const latlng = [point.latitude, point.longitude];
 
-            // Remove old marker
+            // Remove old current marker
             if (currentMarker) {
                 map.removeLayer(currentMarker);
             }
 
-            // Add new marker
-            currentMarker = L.circleMarker(latlng, {
-                radius: 8,
-                fillColor: '#10b981',
-                color: '#059669',
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.8
+            // Add new current marker with arrow icon showing direction
+            currentMarker = L.marker(latlng, {
+                icon: createArrowIcon(point.heading || 0)
             }).addTo(map);
 
             currentMarker.bindPopup(`
@@ -512,8 +572,27 @@
                 Lat: ${point.latitude.toFixed(6)}<br>
                 Lon: ${point.longitude.toFixed(6)}<br>
                 Alt: ${point.altitude ? point.altitude.toFixed(2) + 'm' : 'N/A'}<br>
+                Speed: ${point.speed ? (point.speed * 3.6).toFixed(2) + ' km/h' : 'N/A'}<br>
+                Heading: ${point.heading ? point.heading.toFixed(2) + '°' : 'N/A'}
+            `);
+
+            // Add small circle marker for all tracked points
+            const pointMarker = L.circleMarker(latlng, {
+                radius: 4,
+                fillColor: '#60a5fa',
+                color: '#3b82f6',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.6
+            }).addTo(map);
+
+            pointMarker.bindPopup(`
+                <b>Point ${points.length}</b><br>
+                Time: ${new Date(point.timestamp).toLocaleTimeString()}<br>
                 Speed: ${point.speed ? (point.speed * 3.6).toFixed(2) + ' km/h' : 'N/A'}
             `);
+
+            allPointsMarkers.push(pointMarker);
 
             // Add point to polyline
             polyline.addLatLng(latlng);
@@ -593,6 +672,8 @@
                     map.removeLayer(currentMarker);
                     currentMarker = null;
                 }
+                allPointsMarkers.forEach(marker => map.removeLayer(marker));
+                allPointsMarkers = [];
                 document.getElementById('pointCount').textContent = '0';
                 document.getElementById('duration').textContent = '00:00:00';
                 document.getElementById('latitude').textContent = '--';
